@@ -1,6 +1,9 @@
 <template>
   <div class="home">
-    <header>webRtc demo</header>
+    <header>
+      <div>webRtc demo</div>
+      <div>sokcetId: {{user.name}}</div>
+    </header>
     <div class="home-body">
       <video ref="video1">
       </video>
@@ -36,6 +39,7 @@ import { DeepstreamClient } from '@deepstream/client'
 import { getImageList } from '@/api'
 import { io } from 'socket.io-client'
 // import SimplePeer from 'simple-peer'
+import { User } from '@/types/user'
 type SubscribeType = {
   sender: string
   signal: any
@@ -48,8 +52,11 @@ export default defineComponent({
     const text = ref<string>('')
     const video1 = ref<HTMLVideoElement>()
     const video2 = ref<HTMLVideoElement>()
+    const user = ref<User>({
+      name: '-'
+    })
     const isReceive = ref<boolean>(document.location.hash === '#init')
-    const ds = new DeepstreamClient('localhost:8081')
+    const ds = new DeepstreamClient('localhost:8080')
     const forList = ref()
     forList.value = [
       { name: '第一' },
@@ -73,70 +80,27 @@ export default defineComponent({
       }
     }
 
-    function gotMedia (stream?: MediaStream) {
-      // 创建管道
-      const peer1 = new SimplePeer({ initiator: true })
-      // const peer2 = new SimplePeer({ stream: stream })
-      const userName = 'user/' + ds.getUid()
-      console.log('my userName', userName)
-      // 启动信令
-      peer1.on('signal', (signal: string) => {
-        ds.event.emit('rtc-signal', {
-          sender: userName,
-          signal
-        })
-        // peer2.signal(data)
-      })
-      ds.event.subscribe('rtc-signal', msg => {
-        const data = msg as SubscribeType
-        if (data && data.sender !== userName) {
-          // 如果不是我的消息
-          console.log('rtc-signal', msg)
-          peer1.signal(data.signal)
-        }
-      })
-      // peer2.on('signal', data => {
-      //   peer1.signal(data)
-      // })
-
-      // peer1.on('stream', stream => {
-      //   console.log('peer1 stream', stream)
-      //   const video = video1.value
-      //   if (video) {
-      //     if ('srcObject' in video) {
-      //       video.srcObject = stream
-      //     }
-
-      //     video.play()
-      //   }
-      // })
-      // peer2.on('stream', stream => {
-      //   console.log('peer2 stream', stream)
-      //   const video = video2.value
-      //   if (video) {
-      //     if ('srcObject' in video) {
-      //       video.srcObject = stream
-      //     }
-      //     video.play()
-      //   }
-      // })
-      peer1.on('connect', () => {
-        console.log('peer1 connect')
-        peer1.send('发送和信息')
-        peer1.send('peer1 发送信息')
-      })
-      peer1.on('data', data => {
-        console.log('data', data)
-      })
-    }
     onMounted(() => {
-      const soc = io('http://localhost:3000')
+      const socket = io('http://localhost:3000')
       // 向指定的服务器建立连接，地址可以省略
-      soc.emit('msg', '你好服务器')
+      socket.on('login', (data: any) => {
+        user.value.name = data
+      })
       // 自定义msg事件，发送‘你好服务器’字符串向服务器
-      soc.on('msg', (data: any) => {
+      socket.on('msg', (data: any) => {
         // 监听浏览器通过msg事件发送的信息
         console.log('接收到服务器数据', data)// 你好浏览器
+      })
+      // 房间已满
+      socket.on('full', (room) => { // 如果从服务端收到 "full" 消息
+        console.log('Room ' + room + ' is full')
+      })
+      // 房间空
+      socket.on('empty', (room) => { // 如果从服务端收到 "empty" 消息
+        console.log('Room ' + room + ' is empty')
+      })
+      socket.on('join', (room) => { // 如果从服务端收到 “join" 消息
+        console.log('加入房间成功： ' + room)
       })
       // navigator.mediaDevices.getUserMedia({
       //   video: true,
@@ -152,7 +116,8 @@ export default defineComponent({
       video2,
       isReceive,
       sendMessage,
-      forList
+      forList,
+      user
     }
   }
 })
