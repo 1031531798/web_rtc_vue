@@ -2,7 +2,9 @@
   <div class="home">
     <header>webRtc demo</header>
     <div class="home-body">
-      <video>
+      <video ref="video1">
+      </video>
+      <video ref="video2">
       </video>
     </div>
     <div class="control-box">
@@ -21,110 +23,143 @@
     <div class="message-box">
 
     </div>
+    <div v-for="(item, index) in forList" :key="index">
+      <div>{{item.name}}</div>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, onMounted, ref } from 'vue'
-type RTCSdpType = 'answer' | 'offer' | 'pranswer' | 'rollback';
-
-interface RTCSessionDescriptionInit {
-    sdp?: string;
-    type: RTCSdpType;
-}
+import SimplePeer from 'simple-peer'
+import { DeepstreamClient } from '@deepstream/client'
+import { getImageList } from '@/api'
+import { io } from 'socket.io-client'
 // import SimplePeer from 'simple-peer'
+type SubscribeType = {
+  sender: string
+  signal: any
+}
 export default defineComponent({
   name: 'HomeView',
   components: {
   },
   setup () {
     const text = ref<string>('')
-    // 创建本地RTC对象
-    const localConnection = new RTCPeerConnection()
-    const sendChannel = localConnection.createDataChannel('sendChannel')
-    let receiveChannel
+    const video1 = ref<HTMLVideoElement>()
+    const video2 = ref<HTMLVideoElement>()
+    const isReceive = ref<boolean>(document.location.hash === '#init')
+    const ds = new DeepstreamClient('localhost:8081')
+    const forList = ref()
+    forList.value = [
+      { name: '第一' },
+      { name: '第二' },
+      { name: '第三' },
+      { name: '第四' }
+    ]
+
+    // 发送数据
     function sendMessage (type: string) {
       const messageInputBox = document.getElementById('messageInput') as HTMLInputElement
       if (type === '1') {
         // 发送主机端
         const message = messageInputBox?.value
-        sendChannel.send(message)
+        forList.value.splice(1, 1)
+        console.log(forList.value)
         messageInputBox.value = ''
         messageInputBox.focus()
       } else {
         // 发送给连接者
       }
     }
-    sendChannel.onopen = handleSendChannelStatusChange
-    sendChannel.onclose = handleSendChannelStatusChange
-    // 创建远程RTC对象
-    const remoteConnection = new RTCPeerConnection()
-    remoteConnection.ondatachannel = (event) => {
-      console.log('接受节点消息', event)
-      receiveChannel = event.channel
-      receiveChannel.onmessage = handleReceiveMessage
-      receiveChannel.onopen = () => {
-        console.log('open data channel')
-      }
-      receiveChannel.onclose = () => {
-        console.log('close data channel')
-      }
-    }
-    if (localConnection) {
-      localConnection.createOffer()
-        .then(offer => {
-          console.log(offer)
-          return localConnection.setLocalDescription(offer)
+
+    function gotMedia (stream?: MediaStream) {
+      // 创建管道
+      const peer1 = new SimplePeer({ initiator: true })
+      // const peer2 = new SimplePeer({ stream: stream })
+      const userName = 'user/' + ds.getUid()
+      console.log('my userName', userName)
+      // 启动信令
+      peer1.on('signal', (signal: string) => {
+        ds.event.emit('rtc-signal', {
+          sender: userName,
+          signal
         })
-        .then(() => remoteConnection.setRemoteDescription(localConnection.localDescription as RTCSessionDescriptionInit,
-          () => console.log('成功'), () => console.log('失败')
-        )) // 配置本地连接
-        .then(() => remoteConnection.createAnswer())
-        .then(answer => remoteConnection.setLocalDescription(answer))
-        .then(() => localConnection.setRemoteDescription(remoteConnection.localDescription as RTCSessionDescriptionInit, () => console.log('成功'), () => console.log('失败'))) // 配置远程连接
-        .catch()
-    }
-    function handleSendChannelStatusChange (event: any) {
-      console.log(event)
-    }
-    function handleReceiveMessage (event: any) {
-      console.log(event)
-    }
-    onMounted(() => {
-      // const promise = navigator.mediaDevices.getUserMedia(
-      //   { audio: false, video: true }
-      // )
-      // promise.then((stream) => {
-      //   const video = document.querySelector('video')
+        // peer2.signal(data)
+      })
+      ds.event.subscribe('rtc-signal', msg => {
+        const data = msg as SubscribeType
+        if (data && data.sender !== userName) {
+          // 如果不是我的消息
+          console.log('rtc-signal', msg)
+          peer1.signal(data.signal)
+        }
+      })
+      // peer2.on('signal', data => {
+      //   peer1.signal(data)
+      // })
+
+      // peer1.on('stream', stream => {
+      //   console.log('peer1 stream', stream)
+      //   const video = video1.value
       //   if (video) {
-      //     video.srcObject = stream
+      //     if ('srcObject' in video) {
+      //       video.srcObject = stream
+      //     }
+
       //     video.play()
       //   }
       // })
+      // peer2.on('stream', stream => {
+      //   console.log('peer2 stream', stream)
+      //   const video = video2.value
+      //   if (video) {
+      //     if ('srcObject' in video) {
+      //       video.srcObject = stream
+      //     }
+      //     video.play()
+      //   }
+      // })
+      peer1.on('connect', () => {
+        console.log('peer1 connect')
+        peer1.send('发送和信息')
+        peer1.send('peer1 发送信息')
+      })
+      peer1.on('data', data => {
+        console.log('data', data)
+      })
+    }
+    onMounted(() => {
+      const soc = io('http://localhost:3000')
+      // 向指定的服务器建立连接，地址可以省略
+      soc.emit('msg', '你好服务器')
+      // 自定义msg事件，发送‘你好服务器’字符串向服务器
+      soc.on('msg', (data: any) => {
+        // 监听浏览器通过msg事件发送的信息
+        console.log('接收到服务器数据', data)// 你好浏览器
+      })
+      // navigator.mediaDevices.getUserMedia({
+      //   video: true,
+      //   audio: false
+      // }).then(gotMedia).catch((e) => {
+      //   console.error('media 构建失败', e)
+      // })
+      // gotMedia()
     })
-    // const p2 = new SimplePeer({
-    //   initiator: document.location.hash === '#initiator'
-    // })
-    // p2.on('error', (err: any) => {
-    //   console.log('error', err)
-    // })
-    // p2.on('signal', (data: any) => {
-    //   console.log('SIGNAL', JSON.stringify(data))
-    // })
-    // p2.on('connect', () => {
-    //   console.log('CONNECT')
-    //   p2.send('whatever' + Math.random())
-    // })
-    // p2.on('data', (data: any) => {
-    //   console.log('data: ' + data)
-    // })
-    // console.log(p2, 'P2')
-    // return {
-    // }
     return {
       text,
-      sendMessage
+      video1,
+      video2,
+      isReceive,
+      sendMessage,
+      forList
     }
   }
 })
 </script>
+<style scoped>
+video {
+  width: 300px;
+  height: 150px;
+}
+</style>
