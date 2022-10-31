@@ -1,5 +1,4 @@
 import axios from 'axios'
-import store from '@/store/index'
 import { serialize } from '@/util/util'
 
 const request = axios.create({
@@ -14,7 +13,7 @@ request.interceptors.request.use(
   (config: any) => {
     config.headers.Origin = process.env.VUE_APP_API_URL
     const isToken = (config.headers || {}).isToken === false
-    const token = store.getters.accessToken
+    const token = '22'
     if (token && !isToken) {
       config.headers.Authorization = `${token}`
     }

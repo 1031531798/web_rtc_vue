@@ -10,6 +10,17 @@ export function serialize (data: any) {
 }
 
 /**
+ * 字符串反序列化
+ */
+export function strParse (data: any) {
+  try {
+    return JSON.parse(data)
+  } catch {
+    return data
+  }
+}
+
+/**
  * 格式化时间
  * 调用formatDate(strDate, 'yyyy-MM-dd');
  * @param strDate（中国标准时间、时间戳等）

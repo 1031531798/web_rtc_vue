@@ -11,7 +11,7 @@
         </template>
         <span>创建房间</span>
       </a-button>
-      <a-input-search :style="{width:'320px'}" placeholder="请输入房间号" search-button>
+      <a-input-search v-model="text" :style="{width:'320px'}" placeholder="请输入房间号" search-button @search="joinRoom">
         <template #button-icon>
           <icon-import />
         </template>
@@ -30,6 +30,9 @@ import { io } from 'socket.io-client'
 import { User } from '@/types/user'
 import { Message } from '@arco-design/web-vue'
 import RoomList from '@/components/RoomList.vue'
+import { useRtcStore } from '@/store'
+import { strParse } from '@/util/util'
+import router from '@/router'
 
 export default defineComponent({
   name: 'HomeView',
@@ -39,10 +42,14 @@ export default defineComponent({
   setup () {
     const text = ref<string>('')
     const socket = io('http://localhost:3000')
+
     const user = ref<User>({
       name: '-'
     })
     const roomData = ref([])
+    const rtcStore = useRtcStore()
+    // 保存 socket 实例
+    rtcStore.$patch({ rtcSocket: socket })
 
     // 创建房间
     function createRoom () {
@@ -74,8 +81,7 @@ export default defineComponent({
       })
       // 获取房间列表
       socket.on('roomList', (data: any) => {
-        roomData.value = JSON.parse(data)
-        console.log(roomData.value, 'roomList')
+        roomData.value = strParse(data)
       })
       // 房间已满
       socket.on('full', (room) => { // 如果从服务端收到 "full" 消息
@@ -86,15 +92,17 @@ export default defineComponent({
         console.log('Room ' + room + ' is empty')
       })
       socket.on('join', (room) => { // 如果从服务端收到 “join" 消息
-        console.log('加入房间成功： ' + room)
+        const response = strParse(room)
+        console.log(response)
+        if (response.success) {
+          // 设置当前room对象
+          rtcStore.$patch({ currentRoom: response.data })
+          Message.success('加入房间成功')
+          router.push('/room')
+        } else {
+          Message.warning('加入房间失败')
+        }
       })
-      // navigator.mediaDevices.getUserMedia({
-      //   video: true,
-      //   audio: false
-      // }).then(gotMedia).catch((e) => {
-      //   console.error('media 构建失败', e)
-      // })
-      // gotMedia()
     })
     return {
       text,

@@ -66,15 +66,18 @@ export default defineComponent({
         }
       })
     })
+    const paginationProps = computed(() => {
+      return {
+        defaultPageSize: 5,
+        total: props.data.length
+      }
+    })
     function handleJoin (item) {
       emit('join', item.id)
     }
     return {
       dataSource,
-      paginationProps: reactive({
-        defaultPageSize: 5,
-        total: dataSource.value.length
-      }),
+      paginationProps,
       handleJoin
     }
   }
@@ -95,6 +98,9 @@ export default defineComponent({
     flex-direction: column;
     justify-content: space-between;
     align-items: flex-start;
+  }
+  .arco-list-item-meta-title {
+    text-align: left;
   }
   .list-demo-item {
     padding: 20px 0;
