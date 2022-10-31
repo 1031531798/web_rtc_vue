@@ -8,17 +8,15 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
-    "@deepstream/client": "^6.0.5",
     "@types/axios": "^0.14.0",
     "core-js": "^3.8.3",
-    "simple-peer": "^9.11.1",
     "socket.io-client": "^4.5.3",
     "vue": "^3.2.13",
     "vue-router": "^4.0.3",
     "vuex": "^4.0.0"
   },
   "devDependencies": {
-    "@types/simple-peer": "^9.11.5",
+    "@arco-design/web-vue": "^2.38.0",
     "@typescript-eslint/eslint-plugin": "^5.4.0",
     "@typescript-eslint/parser": "^5.4.0",
     "@vue/cli-plugin-babel": "~5.0.0",
