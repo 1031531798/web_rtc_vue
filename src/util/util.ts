@@ -1,7 +1,7 @@
 /**
  * 对象序列化
  */
-export function serialize (data: any) {
+export function serialize (data: Record<string, unknown>) {
   const list: string[] = []
   Object.keys(data).forEach((ele) => {
     list.push(`${ele}=${data[ele]}`)
@@ -12,7 +12,7 @@ export function serialize (data: any) {
 /**
  * 字符串反序列化
  */
-export function strParse (data: any) {
+export function strParse (data: string) {
   try {
     return JSON.parse(data)
   } catch {
@@ -26,7 +26,7 @@ export function strParse (data: any) {
  * @param strDate（中国标准时间、时间戳等）
  * @param strFormat（返回格式）
  */
-export function dateFormat (strDate: any, strFormat?: any) {
+export function dateFormat (strDate: string | number | Date, strFormat?: string) {
   if (!strDate) {
     return
   }
@@ -42,6 +42,7 @@ export function dateFormat (strDate: any, strFormat?: any) {
       break
   }
   if (strDate instanceof Date) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const dict: any = {
       yyyy: strDate.getFullYear(),
       M: strDate.getMonth() + 1,

@@ -34,7 +34,7 @@
 
 <script>
 import { dateFormat } from '@/util/util'
-import { reactive, defineComponent, computed, watch } from 'vue'
+import { defineComponent, computed } from 'vue'
 
 const avatarSrc = [
   '//p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/a8c8cdb109cb051163646151a4a5083b.png~tplv-uwbnlip3yd-webp.webp',
@@ -60,6 +60,7 @@ export default defineComponent({
         return {
           index: index,
           avatar: avatarSrc[index % avatarSrc.length],
+          id: item.id,
           title: `房间号: ${item.id}`,
           description: `创建人: ${item.createUser} 创建时间: ${dateFormat(item.createDate)}`,
           imageSrc: imageSrc[index % imageSrc.length]
@@ -73,6 +74,7 @@ export default defineComponent({
       }
     })
     function handleJoin (item) {
+      console.log(item)
       emit('join', item.id)
     }
     return {

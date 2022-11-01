@@ -11,7 +11,7 @@
         </template>
         <span>创建房间</span>
       </a-button>
-      <a-input-search v-model="text" :style="{width:'320px'}" placeholder="请输入房间号" search-button @search="joinRoom">
+      <a-input-search v-model="text" :style="{width:'320px'}" placeholder="请输入房间号" search-button @search="handleJoin">
         <template #button-icon>
           <icon-import />
         </template>
@@ -20,20 +20,20 @@
         </template>
       </a-input-search>
     </div>
-    <RoomList style="width: 80%" :data="roomData" />
+    <RoomList style="width: 80%" :data="roomData" @join="handleJoin" />
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, ref } from 'vue'
-import { io } from 'socket.io-client'
+import { defineComponent, onMounted, onUnmounted, ref } from 'vue'
+import { io, Socket } from 'socket.io-client'
 import { User } from '@/types/user'
 import { Message } from '@arco-design/web-vue'
-import RoomList from '@/components/RoomList.vue'
+import RoomList from '@/components/room/RoomList.vue'
 import { useRtcStore } from '@/store'
 import { strParse } from '@/util/util'
 import router from '@/router'
-
+import { joinRoom, leaveRoom } from '@/components/room/roomEvent'
 export default defineComponent({
   name: 'HomeView',
   components: {
@@ -41,59 +41,66 @@ export default defineComponent({
   },
   setup () {
     const text = ref<string>('')
-    const socket = io('http://localhost:3000')
-
     const user = ref<User>({
       name: '-'
     })
     const roomData = ref([])
     const rtcStore = useRtcStore()
-    // 保存 socket 实例
-    rtcStore.$patch({ rtcSocket: socket })
+    const rtcSocket = initSocket()
 
+    // 初始化 socket
+    function initSocket () {
+      if (rtcStore.rtcSocket instanceof Socket) {
+        return rtcStore.rtcSocket
+      } else {
+        const socket = io('http://localhost:3000')
+        rtcStore.rtcSocket = socket
+        return socket
+      }
+    }
     // 创建房间
     function createRoom () {
-      socket.emit('createRoom')
+      rtcSocket.emit('createRoom')
     }
     // 加入房间
-    function joinRoom () {
-      if (text.value) {
-        socket.emit('join', text.value)
-      } else {
-        Message.warning('房间号不能为空')
-      }
+    function handleJoin (id: string) {
+      joinRoom(id || text.value)
     }
 
     function getRoomList () {
-      socket.emit('roomList')
+      rtcSocket.emit('roomList')
     }
 
-    onMounted(() => {
-      getRoomList()
+    function initOnEvent () {
       // 向指定的服务器建立连接，地址可以省略
-      socket.on('login', (data: any) => {
+      rtcSocket.on('login', (data: string) => {
         user.value.name = data
       })
       // 自定义msg事件，发送‘你好服务器’字符串向服务器
-      socket.on('msg', (data: any) => {
+      rtcSocket.on('msg', (data: string) => {
         // 监听浏览器通过msg事件发送的信息
         console.log('接收到服务器数据', data)// 你好浏览器
       })
       // 获取房间列表
-      socket.on('roomList', (data: any) => {
+      rtcSocket.on('roomList', (data: string) => {
         roomData.value = strParse(data)
       })
       // 房间已满
-      socket.on('full', (room) => { // 如果从服务端收到 "full" 消息
+      rtcSocket.on('full', (room: string) => { // 如果从服务端收到 "full" 消息
         console.log('Room ' + room + ' is full')
       })
       // 房间空
-      socket.on('empty', (room) => { // 如果从服务端收到 "empty" 消息
+      rtcSocket.on('empty', (room: string) => { // 如果从服务端收到 "empty" 消息
         console.log('Room ' + room + ' is empty')
       })
-      socket.on('join', (room) => { // 如果从服务端收到 “join" 消息
+      // 断开连接
+      rtcSocket.on('disconnect', () => {
+        if (rtcStore.currentRoom.id) {
+          leaveRoom(rtcStore.currentRoom.id)
+        }
+      })
+      rtcSocket.on('join', (room: string) => { // 如果从服务端收到 “join" 消息
         const response = strParse(room)
-        console.log(response)
         if (response.success) {
           // 设置当前room对象
           rtcStore.$patch({ currentRoom: response.data })
@@ -103,12 +110,20 @@ export default defineComponent({
           Message.warning('加入房间失败')
         }
       })
+    }
+    onUnmounted(() => {
+      rtcSocket.removeListener()
+    })
+    onMounted(() => {
+      getRoomList()
+      initOnEvent()
+      rtcSocket.emit('login')
     })
     return {
       text,
       user,
       createRoom,
-      joinRoom,
+      handleJoin,
       roomData
     }
   }

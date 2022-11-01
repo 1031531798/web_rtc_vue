@@ -1,23 +1,45 @@
 <template>
-  <div class="room">
-    <div class="room-video">
+  <div class="room" v-if="hasInRoom">
+    <div class="room-video rounded-md">
 
     </div>
     <div class="room-main">
-
+      <RoomDetail />
     </div>
+  </div>
+  <div v-else>
+    <EmptyRoom />
   </div>
 </template>
 
 <script setup lang="ts">
 import { useRtcStore } from '@/store'
-import { storeToRefs } from 'pinia'
-import { onMounted } from 'vue-demi'
-
+import { computed, onMounted, onUnmounted } from 'vue-demi'
+import RoomDetail from '@/components/room/RoomDetail.vue'
+import EmptyRoom from '@/components/room/EmptyRoom.vue'
+import { isEmpty } from '@/util/is'
+import { Socket } from 'socket.io-client'
+import { strParse } from '@/util/util'
 const rtcStore = useRtcStore()
-const { currentRoom } = storeToRefs(rtcStore)
+const socket = rtcStore.rtcSocket as Socket
+const hasInRoom = computed(() => {
+  return !isEmpty(rtcStore.currentRoom)
+})
+function setRoomEvent () {
+  if (socket instanceof Socket) {
+    socket.on('roomChange', (roomStr: string) => {
+      const room = strParse(roomStr)
+      console.log(room, 'room change')
+      rtcStore.currentRoom = room
+    })
+  }
+}
+onUnmounted(() => {
+  socket.emit && socket.emit('exit', rtcStore.currentRoom.id)
+})
 onMounted(() => {
-  console.log(currentRoom, '当前的房间')
+  setRoomEvent()
+  console.log(rtcStore.currentRoom, '当前的房间')
 })
 </script>
 
@@ -33,7 +55,6 @@ onMounted(() => {
   &-video {
     display: grid;
     background: #f2f3f5;
-    border-radius: 10px;
     flex: 1;
     height: 100%;
   }

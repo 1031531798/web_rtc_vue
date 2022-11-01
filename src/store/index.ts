@@ -3,7 +3,9 @@ export const useRtcStore = defineStore('rtcStore', {
   state: () => {
     return {
       // 当前room对象
-      currentRoom: {},
+      currentRoom: {
+        id: undefined
+      },
       rtcSocket: {}
     }
   }
