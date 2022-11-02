@@ -35,6 +35,7 @@
 <script>
 import { dateFormat } from '@/util/util'
 import { defineComponent, computed } from 'vue'
+import { joinRoom } from './roomEvent'
 
 const avatarSrc = [
   '//p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/a8c8cdb109cb051163646151a4a5083b.png~tplv-uwbnlip3yd-webp.webp',
@@ -74,8 +75,7 @@ export default defineComponent({
       }
     })
     function handleJoin (item) {
-      console.log(item)
-      emit('join', item.id)
+      joinRoom(item.id)
     }
     return {
       dataSource,

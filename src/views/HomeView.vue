@@ -20,7 +20,7 @@
         </template>
       </a-input-search>
     </div>
-    <RoomList style="width: 80%" :data="roomData" @join="handleJoin" />
+    <RoomList style="width: 80%" :data="roomData" />
   </div>
 </template>
 
@@ -63,8 +63,8 @@ export default defineComponent({
       rtcSocket.emit('createRoom')
     }
     // 加入房间
-    function handleJoin (id: string) {
-      joinRoom(id || text.value)
+    function handleJoin () {
+      joinRoom(text.value)
     }
 
     function getRoomList () {
@@ -124,6 +124,7 @@ export default defineComponent({
       user,
       createRoom,
       handleJoin,
+      joinRoom,
       roomData
     }
   }

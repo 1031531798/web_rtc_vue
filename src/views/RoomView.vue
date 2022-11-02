@@ -1,7 +1,8 @@
 <template>
   <div class="room" v-if="hasInRoom">
     <div class="room-video rounded-md">
-
+      <video id="Rtc"></video>
+      <video id="RtcB"></video>
     </div>
     <div class="room-main">
       <RoomDetail />
@@ -17,13 +18,13 @@ import { useRtcStore } from '@/store'
 import { computed, onMounted, onUnmounted } from 'vue-demi'
 import RoomDetail from '@/components/room/RoomDetail.vue'
 import EmptyRoom from '@/components/room/EmptyRoom.vue'
-import { isEmpty } from '@/util/is'
+import { LocalRtc } from '@/components/media/local'
 import { Socket } from 'socket.io-client'
 import { strParse } from '@/util/util'
 const rtcStore = useRtcStore()
 const socket = rtcStore.rtcSocket as Socket
 const hasInRoom = computed(() => {
-  return !isEmpty(rtcStore.currentRoom)
+  return rtcStore.currentRoom.id
 })
 function setRoomEvent () {
   if (socket instanceof Socket) {
@@ -32,10 +33,12 @@ function setRoomEvent () {
       console.log(room, 'room change')
       rtcStore.currentRoom = room
     })
+    new LocalRtc().initMedia()
   }
 }
 onUnmounted(() => {
   socket.emit && socket.emit('exit', rtcStore.currentRoom.id)
+  rtcStore.currentRoom = { id: undefined }
 })
 onMounted(() => {
   setRoomEvent()
