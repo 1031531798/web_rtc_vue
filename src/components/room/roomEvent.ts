@@ -14,9 +14,11 @@ export function joinRoom (id: string) {
 
 // 离开房间
 export function leaveRoom (id: string) {
-  const { rtcSocket } = useRtcStore()
+  const rtcStore = useRtcStore()
+  const { rtcSocket } = rtcStore
   if (id && rtcSocket instanceof Socket) {
     rtcSocket.emit('exit', id)
+    rtcStore.clearRoom()
   } else {
     Message.warning('房间号不能为空')
   }

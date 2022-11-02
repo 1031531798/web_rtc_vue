@@ -2,7 +2,7 @@
   <div class="home">
     <header>
       <div>webRtc demo</div>
-      <div>sokcetId: {{user.name}}</div>
+      <div>sokcetId: {{user}}</div>
     </header>
     <div class="control-box">
       <a-button type="primary" status="success" style="margin-right:20px" @click="createRoom">
@@ -25,7 +25,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, onUnmounted, ref } from 'vue'
+import { computed, defineComponent, onMounted, onUnmounted, ref } from 'vue'
 import { io, Socket } from 'socket.io-client'
 import { User } from '@/types/user'
 import { Message } from '@arco-design/web-vue'
@@ -41,19 +41,18 @@ export default defineComponent({
   },
   setup () {
     const text = ref<string>('')
-    const user = ref<User>({
-      name: '-'
+    const user = computed(() => {
+      return rtcStore.user.userId
     })
     const roomData = ref([])
     const rtcStore = useRtcStore()
     const rtcSocket = initSocket()
-
     // 初始化 socket
     function initSocket () {
       if (rtcStore.rtcSocket instanceof Socket) {
         return rtcStore.rtcSocket
       } else {
-        const socket = io('http://localhost:3000')
+        const socket = io('http://192.168.19.129:3000')
         rtcStore.rtcSocket = socket
         return socket
       }
@@ -71,10 +70,11 @@ export default defineComponent({
       rtcSocket.emit('roomList')
     }
 
+    // socket 响应监听
     function initOnEvent () {
       // 向指定的服务器建立连接，地址可以省略
       rtcSocket.on('login', (data: string) => {
-        user.value.name = data
+        rtcStore.user.userId = data
       })
       // 自定义msg事件，发送‘你好服务器’字符串向服务器
       rtcSocket.on('msg', (data: string) => {

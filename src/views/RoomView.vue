@@ -2,7 +2,6 @@
   <div class="room" v-if="hasInRoom">
     <div class="room-video rounded-md">
       <video id="Rtc"></video>
-      <video id="RtcB"></video>
     </div>
     <div class="room-main">
       <RoomDetail />
@@ -18,9 +17,10 @@ import { useRtcStore } from '@/store'
 import { computed, onMounted, onUnmounted } from 'vue-demi'
 import RoomDetail from '@/components/room/RoomDetail.vue'
 import EmptyRoom from '@/components/room/EmptyRoom.vue'
-import { LocalRtc } from '@/components/media/local'
+import { MultiplayerRealTime } from '@/components/media/multiplayer'
 import { Socket } from 'socket.io-client'
 import { strParse } from '@/util/util'
+import { leaveRoom } from '@/components/room/roomEvent'
 const rtcStore = useRtcStore()
 const socket = rtcStore.rtcSocket as Socket
 const hasInRoom = computed(() => {
@@ -30,15 +30,13 @@ function setRoomEvent () {
   if (socket instanceof Socket) {
     socket.on('roomChange', (roomStr: string) => {
       const room = strParse(roomStr)
-      console.log(room, 'room change')
       rtcStore.currentRoom = room
     })
-    new LocalRtc().initMedia()
+    new MultiplayerRealTime().init()
   }
 }
 onUnmounted(() => {
-  socket.emit && socket.emit('exit', rtcStore.currentRoom.id)
-  rtcStore.currentRoom = { id: undefined }
+  rtcStore.currentRoom.id && leaveRoom(rtcStore.currentRoom.id)
 })
 onMounted(() => {
   setRoomEvent()
@@ -57,6 +55,9 @@ onMounted(() => {
   margin: 10px;
   &-video {
     display: grid;
+    grid-template-columns: repeat(4, calc(25% - 20px));
+    grid-gap: 20px;
+    justify-content: center;
     background: #f2f3f5;
     flex: 1;
     height: 100%;

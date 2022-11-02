@@ -6,7 +6,18 @@ export const useRtcStore = defineStore('rtcStore', {
       currentRoom: {
         id: undefined
       },
-      rtcSocket: {}
+      rtcSocket: {},
+      user: {
+        userId: ''
+      }
+    }
+  },
+  actions: {
+    clearRoom () {
+      this.currentRoom = {
+        id: undefined
+      }
+      console.log(this)
     }
   }
 })
