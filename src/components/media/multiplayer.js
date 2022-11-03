@@ -15,7 +15,6 @@ export class MultiplayerRealTime {
 
   init () {
     this.getUserMedia()
-    this.socketInit()
   }
 
   getUserMedia () {
@@ -55,6 +54,7 @@ export class MultiplayerRealTime {
         video.onloadedmetadata = function (e) {
           video.play()
         }
+        this.socketInit()
         this.initVideo()
       })
       .catch((err) => { // 捕获错误
@@ -64,7 +64,6 @@ export class MultiplayerRealTime {
 
   createPeerConnection (user) {
     const videoBox = document.querySelector('.room-video')
-    console.log('添加video', videoBox)
     const iceServer = {
       iceServers: [
         {
@@ -83,7 +82,6 @@ export class MultiplayerRealTime {
 
     // 如果检测到媒体流连接到本地，将其绑定到一个video标签上输出
     peer.onaddstream = (event) => {
-      // console.log('event-stream', event);
       const videos = document.querySelector('#' + user.userId)
       if (videos) {
         videos.srcObject = event.stream
@@ -93,6 +91,7 @@ export class MultiplayerRealTime {
         video.autoplay = 'autoplay'
         video.srcObject = event.stream
         video.id = user.userId
+        console.log('添加video', video)
         videoBox.append(video)
       }
     }
@@ -102,7 +101,7 @@ export class MultiplayerRealTime {
         this.socket.emit('__ice_candidate', { candidate: event.candidate, roomid: this.roomData.id, userId: user.userId })
       }
     }
-    // console.log('v.userId', v.userId);
+    console.log('设置peerList 值', peer)
     this.peerList[user.userId] = peer
   }
 
@@ -122,13 +121,12 @@ export class MultiplayerRealTime {
   initVideo () {
     this.roomData.roomPerson.forEach(item => {
       const { userId } = item
-      if (!this.peerList[userId] && userId !== this.store.user.userId) {
+      if (!this.peerList[userId]) {
         this.createPeerConnection(item)
       }
     })
 
     for (const k in this.peerList) {
-      console.log(this.peerList)
       this.createOffer(k, this.peerList[k])
     }
   }
@@ -136,7 +134,8 @@ export class MultiplayerRealTime {
   socketInit () {
     const socket = this.socket
     socket.on('offer', v => {
-      // console.log('take_offer', this.peerList[v.userId]);
+      console.log('peerlist', this.peerList)
+      console.log('take_offer', this.peerList[v.userId])
       this.peerList[v.userId] && this.peerList[v.userId].setRemoteDescription(v.sdp, () => {
         this.peerList[v.userId].createAnswer().then((desc) => {
           // console.log('send-answer', desc);

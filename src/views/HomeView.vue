@@ -52,7 +52,7 @@ export default defineComponent({
       if (rtcStore.rtcSocket instanceof Socket) {
         return rtcStore.rtcSocket
       } else {
-        const socket = io('http://192.168.19.129:3000')
+        const socket = io('http://localhost:3000')
         rtcStore.rtcSocket = socket
         return socket
       }
