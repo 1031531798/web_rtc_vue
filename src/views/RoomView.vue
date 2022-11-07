@@ -1,7 +1,7 @@
 <template>
   <div class="room" v-if="hasInRoom">
     <div class="room-video rounded-md">
-      <div class="room-video-item" v-for="(item, key) of getVideoList" :key="key">
+      <div class="room-video-item" :id="item.name" v-for="(item, key) of getVideoList" :key="key">
         <video :id="key"></video>
         <div>{{item.name}}</div>
       </div>
@@ -46,10 +46,10 @@ function setRoomEvent () {
       }
     })
     socket.on('exit', (userId: string) => {
-      // const videoBox = document.querySelector('.room-video')
-      const video = document.querySelector('#' + userId)
-      video?.remove()
-      console.log(userId, '用户退出')
+      if (userId) {
+        const box = document.getElementById(userId)
+        box?.remove()
+      }
     })
     multipVideo.value = new MultiplayerRealTime()
     multipVideo.value.init()
