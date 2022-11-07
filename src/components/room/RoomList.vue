@@ -11,6 +11,7 @@
           <span><icon-heart />83</span>
           <span><icon-star />{{ item.index }}</span>
           <span class="menu-join" @click="handleJoin(item)"><icon-import />join</span>
+          <span v-if="item.personNum">房间人数:{{item.personNum}}</span>
         </template>
         <template #extra>
           <div className="image-area">
@@ -58,10 +59,12 @@ export default defineComponent({
   setup (props, { emit }) {
     const dataSource = computed(() => {
       return props.data.map((item, index) => {
+        console.log(item)
         return {
           index: index,
           avatar: avatarSrc[index % avatarSrc.length],
           id: item.id,
+          personNum: item.personNum,
           title: `房间号: ${item.id}`,
           description: `创建人: ${item.createUser} 创建时间: ${dateFormat(item.createDate)}`,
           imageSrc: imageSrc[index % imageSrc.length]
