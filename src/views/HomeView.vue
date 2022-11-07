@@ -27,7 +27,6 @@
 <script lang="ts">
 import { computed, defineComponent, onMounted, onUnmounted, ref } from 'vue'
 import { io, Socket } from 'socket.io-client'
-import { User } from '@/types/user'
 import { Message } from '@arco-design/web-vue'
 import RoomList from '@/components/room/RoomList.vue'
 import { useRtcStore } from '@/store'
@@ -52,7 +51,10 @@ export default defineComponent({
       if (rtcStore.rtcSocket instanceof Socket) {
         return rtcStore.rtcSocket
       } else {
-        const socket = io('http://localhost:3000')
+        const socket = io({
+          path: '/rtcSocket',
+          secure: true
+        })
         rtcStore.rtcSocket = socket
         return socket
       }

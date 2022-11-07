@@ -3,7 +3,9 @@ function getProxy () {
   try {
     proxys = JSON.parse(proxys)
   } catch (error) {}
-  const proxy = {}
+  const proxy = {
+
+  }
   for (const [prefix, target] of proxys) {
     if (prefix && target) {
       proxy[prefix] = {

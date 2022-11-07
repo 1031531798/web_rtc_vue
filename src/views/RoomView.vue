@@ -1,7 +1,10 @@
 <template>
   <div class="room" v-if="hasInRoom">
     <div class="room-video rounded-md">
-      <video id="Rtc"></video>
+      <div class="room-video-item" v-for="(item, key) of getVideoList" :key="key">
+        <video :id="key"></video>
+        <div>{{item.name}}</div>
+      </div>
     </div>
     <div class="room-main">
       <RoomDetail />
@@ -14,7 +17,7 @@
 
 <script setup lang="ts">
 import { useRtcStore } from '@/store'
-import { computed, onMounted, onUnmounted } from 'vue-demi'
+import { computed, onMounted, onUnmounted, ref } from 'vue-demi'
 import RoomDetail from '@/components/room/RoomDetail.vue'
 import EmptyRoom from '@/components/room/EmptyRoom.vue'
 import { MultiplayerRealTime } from '@/components/media/multiplayer'
@@ -23,22 +26,42 @@ import { strParse } from '@/util/util'
 import { leaveRoom } from '@/components/room/roomEvent'
 const rtcStore = useRtcStore()
 const socket = rtcStore.rtcSocket as Socket
+const multipVideo = ref()
 const hasInRoom = computed(() => {
   return rtcStore.currentRoom.id
 })
+const getVideoList = computed(() => {
+  return rtcStore.videoList
+})
+
 function setRoomEvent () {
   if (socket instanceof Socket) {
     socket.on('roomChange', (roomStr: string) => {
       const room = strParse(roomStr)
       rtcStore.currentRoom = room
     })
-    new MultiplayerRealTime().init()
+    socket.on('addUser', (id: string) => {
+      if (id !== rtcStore.user.userId) {
+        multipVideo.value && multipVideo.value.addUser({ userId: id })
+      }
+    })
+    socket.on('exit', (userId: string) => {
+      // const videoBox = document.querySelector('.room-video')
+      const video = document.querySelector('#' + userId)
+      video?.remove()
+      console.log(userId, '用户退出')
+    })
+    multipVideo.value = new MultiplayerRealTime()
+    multipVideo.value.init()
   }
 }
 onUnmounted(() => {
   rtcStore.currentRoom.id && leaveRoom(rtcStore.currentRoom.id)
 })
 onMounted(() => {
+  if (rtcStore.user.userId) {
+    rtcStore.videoList[rtcStore.user.userId] = rtcStore.user
+  }
   setRoomEvent()
   console.log(rtcStore.currentRoom, '当前的房间')
 })
@@ -61,6 +84,12 @@ onMounted(() => {
     background: #f2f3f5;
     flex: 1;
     height: 100%;
+    &-item {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+    }
   }
   &-main {
     display: flex;
