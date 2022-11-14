@@ -204,4 +204,12 @@ export class MultiplayerRealTime {
     obj.name = user.userId
     return obj
   }
+
+  // 关闭 媒体通讯
+  disconnect () {
+    this.close()
+    this.localStream.getTracks().forEach(track => {
+      track.stop()
+    })
+  }
 }

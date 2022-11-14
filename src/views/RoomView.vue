@@ -17,7 +17,8 @@
 
 <script setup lang="ts">
 import { useRtcStore } from '@/store'
-import { computed, onMounted, onUnmounted, ref } from 'vue-demi'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { Message } from '@arco-design/web-vue'
 import RoomDetail from '@/components/room/RoomDetail.vue'
 import EmptyRoom from '@/components/room/EmptyRoom.vue'
 import { MultiplayerRealTime } from '@/components/media/multiplayer'
@@ -39,6 +40,7 @@ function setRoomEvent () {
     socket.on('addUser', (id: string) => {
       if (id !== rtcStore.user.userId) {
         multipVideo.value && multipVideo.value.addUser({ userId: id })
+        Message.info(`${id} 加入房间`)
       }
     })
     socket.on('roomChange', (roomStr: string) => {
@@ -50,6 +52,7 @@ function setRoomEvent () {
       if (userId) {
         const box = document.getElementById(userId)
         box?.remove()
+        Message.info(`${userId} 退出房间`)
       }
     })
     multipVideo.value = new MultiplayerRealTime()
@@ -58,6 +61,8 @@ function setRoomEvent () {
 }
 onUnmounted(() => {
   rtcStore.currentRoom.id && leaveRoom(rtcStore.currentRoom.id)
+  // 关闭媒体通讯
+  multipVideo.value && multipVideo.value.disconnect()
 })
 onMounted(() => {
   if (rtcStore.user.userId) {
