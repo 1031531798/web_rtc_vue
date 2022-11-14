@@ -36,14 +36,15 @@ const getVideoList = computed(() => {
 
 function setRoomEvent () {
   if (socket instanceof Socket) {
-    socket.on('roomChange', (roomStr: string) => {
-      const room = strParse(roomStr)
-      rtcStore.currentRoom = room
-    })
     socket.on('addUser', (id: string) => {
       if (id !== rtcStore.user.userId) {
         multipVideo.value && multipVideo.value.addUser({ userId: id })
       }
+    })
+    socket.on('roomChange', (roomStr: string) => {
+      const room = strParse(roomStr)
+      console.log('room change', room)
+      rtcStore.currentRoom = room
     })
     socket.on('exit', (userId: string) => {
       if (userId) {

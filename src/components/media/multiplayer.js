@@ -90,6 +90,7 @@ export class MultiplayerRealTime {
     // 如果检测到媒体流连接到本地，将其绑定到一个video标签上输出
     peer.onaddstream = (event) => {
       let video = document.getElementById(user.userId)
+      console.log('媒体流', event.stream)
       if (video) {
         if ('srcObject' in video) { // 判断是否支持 srcObject 属性
           video.srcObject = event.stream
