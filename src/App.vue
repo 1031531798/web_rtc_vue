@@ -16,6 +16,8 @@
   display: flex;
   flex-direction: column;
   flex-grow: 1;
+  background: #f2f3f5;
+
 }
 
 nav {

@@ -8,6 +8,7 @@
     </div>
     <div class="room-main">
       <RoomDetail />
+      <RoomMessage />
     </div>
   </div>
   <div v-else>
@@ -20,6 +21,7 @@ import { useRtcStore } from '@/store'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import RoomDetail from '@/components/room/RoomDetail.vue'
+import RoomMessage from '@/components/room/RoomMessage.vue'
 import EmptyRoom from '@/components/room/EmptyRoom.vue'
 import { MultiplayerRealTime } from '@/components/media/multiplayer'
 import { Socket } from 'socket.io-client'
@@ -45,7 +47,6 @@ function setRoomEvent () {
     })
     socket.on('roomChange', (roomStr: string) => {
       const room = strParse(roomStr)
-      console.log('room change', room)
       rtcStore.currentRoom = room
     })
     socket.on('exit', (userId: string) => {
@@ -87,9 +88,9 @@ onMounted(() => {
     grid-template-columns: repeat(4, calc(25% - 20px));
     grid-gap: 20px;
     justify-content: center;
-    background: #f2f3f5;
     flex: 1;
     height: 100%;
+    background-color: $bg-white;
     &-item {
       display: flex;
       flex-direction: column;

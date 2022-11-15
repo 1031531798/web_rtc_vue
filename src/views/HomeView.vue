@@ -85,7 +85,6 @@ export default defineComponent({
       })
       // 获取房间列表
       rtcSocket.on('roomList', (data: string) => {
-        console.log(data)
         roomData.value = strParse(data)
       })
       // 房间已满
