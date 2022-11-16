@@ -1,9 +1,14 @@
 <template>
   <div class="room-message rounded-md">
-    <div class="room-message ">
+    <div class="room-message-body ">
       <h3>聊天消息</h3>
-      <div v-for="item in messageList" :key="item.userId">
+      <div class="room-message-list">
+        <div v-for="item in messageList" :key="item.userId">
 
+        </div>
+      </div>
+      <div class="room-message-input">
+        <a-textarea placeholder="Please enter something" :max-length="10" allow-clear show-word-limit />
       </div>
     </div>
   </div>
@@ -12,6 +17,7 @@
 <script setup>
 import { useRtcStore } from '@/store'
 import { computed } from 'vue-demi'
+
 const messageList = computed(() => {
   return []
 })
@@ -30,6 +36,15 @@ const messageList = computed(() => {
     h3 {
       width: 100%;
       text-align: center;
+    }
+    &-body {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      &-input {
+         padding: 10px;
+      }
     }
   }
 </style>
