@@ -2,26 +2,33 @@
   <div class="room-message rounded-md">
     <div class="room-message-body ">
       <h3>聊天消息</h3>
-      <div class="room-message-list">
+      <div class="room-message-body-list">
         <div v-for="item in messageList" :key="item.userId">
 
         </div>
       </div>
-      <div class="room-message-input">
-        <a-textarea placeholder="Please enter something" :max-length="10" allow-clear show-word-limit />
+      <div class="room-message-body-input">
+        <a-textarea v-model:model-value="msgText" placeholder="有什么想说的吗..." :max-length="20" allow-clear show-word-limit />
+        <a-button status="success" type="primary" @click="sendMessage" @keydown.enter="sendMessage">发送</a-button>
       </div>
     </div>
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { useRtcStore } from '@/store'
 import { computed } from 'vue-demi'
-
+import { ref } from 'vue'
+import { Socket } from 'socket.io-client'
+const msgText = ref<string>('')
 const messageList = computed(() => {
   return []
 })
-
+function sendMessage () {
+  const socket = useRtcStore().rtcSocket as Socket
+  socket && socket.emit('message', msgText.value)
+  msgText.value = ''
+}
 </script>
 
 <style lang="scss" scoped>
@@ -42,8 +49,10 @@ const messageList = computed(() => {
       height: 100%;
       display: flex;
       flex-direction: column;
+      justify-content: space-between;
       &-input {
          padding: 10px;
+        text-align: right;
       }
     }
   }
