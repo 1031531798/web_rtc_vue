@@ -1,19 +1,18 @@
 <template>
   <div class="room-message-box">
-
+    {{data.msg}}
   </div>
 </template>
 
 <script setup lang="ts">
 import { useRtcStore } from '@/store'
-import {MessageData, MessageModeEnum} from './types'
-
+import { MessageData } from './types'
+import { defineProps } from 'vue'
 const props = defineProps<{
   data: MessageData
 }>()
-    const store = useRtcStore()
-    const user = store.user
-    const mode = user.userId === props.data.userId ? MessageModeEnum.left ? MessageModeEnum.right.
+const store = useRtcStore()
+const user = store.user
 
 </script>
 

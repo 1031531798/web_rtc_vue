@@ -5,7 +5,8 @@ export const useRtcStore = defineStore('rtcStore', {
       // 当前room对象
       currentRoom: {
         id: undefined,
-        roomPerson: []
+        roomPerson: [],
+        messageList: []
       },
       rtcSocket: {},
       user: {
@@ -18,7 +19,8 @@ export const useRtcStore = defineStore('rtcStore', {
     clearRoom () {
       this.currentRoom = {
         id: undefined,
-        roomPerson: []
+        roomPerson: [],
+        messageList: []
       }
       console.log(this)
     }
