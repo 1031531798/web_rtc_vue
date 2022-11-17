@@ -8,7 +8,7 @@
         </div>
       </div>
       <div class="room-message-body-input">
-        <a-textarea v-model:model-value="msgText" placeholder="有什么想说的吗..." :max-length="20" allow-clear show-word-limit />
+        <a-textarea v-model:model-value="msgText" placeholder="有什么想说的吗..." @keydown.enter="enterEvent" :max-length="30" allow-clear show-word-limit />
         <a-button status="success" type="primary" @click="sendMessage" @keydown.enter="sendMessage">发送</a-button>
       </div>
     </div>
@@ -24,6 +24,10 @@ const msgText = ref<string>('')
 const messageList = computed(() => {
   return []
 })
+function enterEvent (event: KeyboardEvent) {
+  event.preventDefault()// 阻止浏览器默认换行操作
+  sendMessage()
+}
 function sendMessage () {
   const socket = useRtcStore().rtcSocket as Socket
   socket && socket.emit('message', msgText.value)
@@ -51,8 +55,15 @@ function sendMessage () {
       flex-direction: column;
       justify-content: space-between;
       &-input {
-         padding: 10px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        padding: 10px;
         text-align: right;
+        button {
+          height: 100%;
+          width: 50px;
+        }
       }
     }
   }
