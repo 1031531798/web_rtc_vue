@@ -59,7 +59,6 @@ export default defineComponent({
   setup (props, { emit }) {
     const dataSource = computed(() => {
       return props.data.map((item, index) => {
-        console.log(item)
         return {
           index: index,
           avatar: avatarSrc[index % avatarSrc.length],

@@ -36,7 +36,10 @@ onMounted(() => {
   })
 })
 function sendMessage () {
-  socket && socket.emit('message', msgText.value)
+  // 判断是否全为空格
+  if (!msgText.value.match(/^\s+$/) && msgText.value) {
+    socket && socket.emit('message', msgText.value)
+  }
   msgText.value = ''
 }
 </script>
@@ -53,6 +56,7 @@ function sendMessage () {
     h3 {
       width: 100%;
       text-align: center;
+      font-weight: bold;
     }
     &-body {
       width: 100%;
@@ -64,6 +68,9 @@ function sendMessage () {
         display: flex;
         flex-direction: column;
         justify-content: flex-start;
+        flex: 1;
+        padding: 10px;
+        overflow-y: auto;
       }
       &-input {
         display: flex;

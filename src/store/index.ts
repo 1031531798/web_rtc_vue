@@ -10,7 +10,8 @@ export const useRtcStore = defineStore('rtcStore', {
       },
       rtcSocket: {},
       user: {
-        userId: ''
+        userId: '',
+        name: ''
       },
       videoList: {} as any
     }

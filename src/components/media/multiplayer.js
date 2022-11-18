@@ -6,7 +6,6 @@ export class MultiplayerRealTime {
   localStream
   socket
   store
-  videoMap
   constructor () {
     this.peerList = {}
     this.localStream = undefined
@@ -15,7 +14,6 @@ export class MultiplayerRealTime {
     this.roomData = computed(() => {
       return this.store.currentRoom
     })
-    this.videoMap = new Map()
   }
 
   init () {
@@ -42,7 +40,7 @@ export class MultiplayerRealTime {
       }
     }
     navigator.mediaDevices.getUserMedia({
-      audio: false,
+      audio: true,
       video: {
         width: { min: 200, ideal: 1280, max: 300 },
         height: { min: 100, ideal: 720, max: 200 }
@@ -70,7 +68,12 @@ export class MultiplayerRealTime {
 
   createPeerConnection (user) {
     const videoBox = document.querySelector('.room-video')
-    this.store.videoList[user.userId] = user
+    const videoList = this.store.videoList
+    videoList[user.userId] = user
+    this.store.$patch({
+      videoList
+    })
+    console.log('添加videolist', this.store.videoList)
     const iceServer = {
       iceServers: [
         {
@@ -169,9 +172,8 @@ export class MultiplayerRealTime {
       })
     })
     socket.on('answer', v => {
-      console.log('接收到answer', v.userId)
       this.peerList[v.userId] && this.peerList[v.userId].setRemoteDescription(v.sdp, () => {
-        console.log('11')
+        console.log('接收到answer', v.userId)
       }, () => { // console.log(err)
       })
     })

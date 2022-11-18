@@ -2,8 +2,8 @@
   <div class="room" v-if="hasInRoom">
     <div class="room-video rounded-md">
       <div class="room-video-item" :id="item.name" v-for="(item, key) of getVideoList" :key="key">
-        <video :id="key"></video>
-        <div>{{item.name}}</div>
+        <video controls :id="key"></video>
+        <div>{{item.name || item.userId}}</div>
       </div>
     </div>
     <div class="room-main">
@@ -23,7 +23,7 @@ import { Message } from '@arco-design/web-vue'
 import RoomDetail from '@/components/room/RoomDetail.vue'
 import RoomMessage from '@/components/room/RoomMessage.vue'
 import EmptyRoom from '@/components/room/EmptyRoom.vue'
-import { MultiplayerRealTime } from '@/components/media/multiplayer'
+import { MultiplayerRealTime } from '@/components/media/multiplayer.js'
 import { Socket } from 'socket.io-client'
 import { strParse } from '@/util/util'
 import { leaveRoom } from '@/components/room/roomEvent'
@@ -34,6 +34,7 @@ const hasInRoom = computed(() => {
   return rtcStore.currentRoom.id
 })
 const getVideoList = computed(() => {
+  console.log('更新 videoList')
   return rtcStore.videoList
 })
 
@@ -42,6 +43,7 @@ function setRoomEvent () {
     socket.on('addUser', (id: string) => {
       if (id !== rtcStore.user.userId) {
         multipVideo.value && multipVideo.value.addUser({ userId: id })
+        rtcStore.videoList[id] = rtcStore.user
         Message.info(`${id} 加入房间`)
       }
     })
@@ -55,6 +57,7 @@ function setRoomEvent () {
         box?.remove()
         Message.info(`${userId} 退出房间`)
       }
+      delete rtcStore.videoList[userId]
     })
     multipVideo.value = new MultiplayerRealTime()
     multipVideo.value.init()
@@ -66,10 +69,12 @@ onUnmounted(() => {
   multipVideo.value && multipVideo.value.disconnect()
 })
 onMounted(() => {
-  if (rtcStore.user.userId) {
-    rtcStore.videoList[rtcStore.user.userId] = rtcStore.user
+  if (rtcStore.currentRoom.id) {
+    if (rtcStore.user.userId) {
+      rtcStore.videoList[rtcStore.user.userId] = rtcStore.user
+    }
+    setRoomEvent()
   }
-  setRoomEvent()
   console.log(rtcStore.currentRoom, '当前的房间')
 })
 </script>
