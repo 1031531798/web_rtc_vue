@@ -12,8 +12,7 @@ export const useRtcStore = defineStore('rtcStore', {
       user: {
         userId: '',
         name: ''
-      },
-      videoList: {} as any
+      }
     }
   },
   actions: {

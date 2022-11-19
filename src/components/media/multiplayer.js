@@ -1,5 +1,6 @@
 import { useRtcStore } from '@/store'
-import { computed } from 'vue'
+import { computed, nextTick } from 'vue'
+import { useJoinPeerId } from '@/hook/room'
 export class MultiplayerRealTime {
   peerList
   roomData
@@ -49,15 +50,19 @@ export class MultiplayerRealTime {
       .then(stream => {
         this.localStream = stream
         const user = this.store.user
-        const video = document.getElementById(user.userId)
-        if ('srcObject' in video) { // 判断是否支持 srcObject 属性
-          video.srcObject = stream
-        } else {
-          video.src = window.URL.createObjectURL(stream)
-        }
-        video.onloadedmetadata = () => {
-          video.play()
-        }
+
+        nextTick(() => {
+          const video = document.getElementById(user.userId)
+          console.log(video, 'video')
+          if ('srcObject' in video) { // 判断是否支持 srcObject 属性
+            video.srcObject = stream
+          } else {
+            video.src = window.URL.createObjectURL(stream)
+          }
+          video.onloadedmetadata = () => {
+            video.play()
+          }
+        })
         this.socketInit()
         this.initVideo()
       })
@@ -68,12 +73,6 @@ export class MultiplayerRealTime {
 
   createPeerConnection (user) {
     const videoBox = document.querySelector('.room-video')
-    const videoList = this.store.videoList
-    videoList[user.userId] = user
-    this.store.$patch({
-      videoList
-    })
-    console.log('添加videolist', this.store.videoList)
     const iceServer = {
       iceServers: [
         {
@@ -92,26 +91,28 @@ export class MultiplayerRealTime {
 
     // 如果检测到媒体流连接到本地，将其绑定到一个video标签上输出
     peer.onaddstream = (event) => {
-      let video = document.getElementById(user.userId)
-      console.log('媒体流', event.stream)
-      if (video) {
-        if ('srcObject' in video) { // 判断是否支持 srcObject 属性
-          video.srcObject = event.stream
+      nextTick(() => {
+        let video = document.getElementById(user.userId)
+        console.log('媒体流', event.stream)
+        if (video) {
+          if ('srcObject' in video) { // 判断是否支持 srcObject 属性
+            video.srcObject = event.stream
+          } else {
+            video.src = window.URL.createObjectURL(event.stream)
+          }
         } else {
-          video.src = window.URL.createObjectURL(event.stream)
+          video = document.createElement('video')
+          video.controls = true
+          video.autoplay = 'autoplay'
+          video.srcObject = event.stream
+          video.id = user.userId
+        // videoBox.append(video)
         }
-      } else {
-        video = document.createElement('video')
-        video.controls = true
-        video.autoplay = 'autoplay'
-        video.srcObject = event.stream
-        video.id = user.userId
-        videoBox.append(video)
-      }
-      video.onloadedmetadata = () => {
-        video.play()
-        console.log('播放video', video)
-      }
+        video.onloadedmetadata = () => {
+          video.play()
+          console.log('播放video', video)
+        }
+      })
     }
     // 发送ICE候选到其他客户端
     peer.onicecandidate = (event) => {
@@ -191,6 +192,15 @@ export class MultiplayerRealTime {
     })
   }
 
+  closePeer (id) {
+    console.log('退出房间', id)
+    if (this.peerList[id]) {
+      this.peerList[id].close()
+      delete this.peerList[id]
+    }
+    console.log('peerList', this.peerList)
+  }
+
   close () {
     for (const k in this.peerList) {
       this.peerList[k].close()
@@ -201,8 +211,7 @@ export class MultiplayerRealTime {
   // 处理用户对象
   concatName (user) {
     const obj = {}
-    const arr = [user.userId, this.store.user.userId]
-    obj.userId = arr.sort().join('-')
+    obj.userId = useJoinPeerId(user.userId)
     obj.name = user.userId
     return obj
   }

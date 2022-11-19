@@ -1,9 +1,16 @@
 <template>
   <div class="room" v-if="hasInRoom">
     <div class="room-video rounded-md">
+      <div class="room-video-item">
+        <video controls :id="rtcStore.user.userId"></video>
+        <div>
+          <span>{{rtcStore.user.userId}}</span>
+          <IconFaceSmileFill style="color: #ffcd00" />
+        </div>
+      </div>
       <div class="room-video-item" :id="item.name" v-for="(item, key) of getVideoList" :key="key">
         <video controls :id="key"></video>
-        <div>{{item.name || item.userId}}</div>
+        <div>{{getVideoUserName(key)}}</div>
       </div>
     </div>
     <div class="room-main">
@@ -27,6 +34,7 @@ import { MultiplayerRealTime } from '@/components/media/multiplayer.js'
 import { Socket } from 'socket.io-client'
 import { strParse } from '@/util/util'
 import { leaveRoom } from '@/components/room/roomEvent'
+import { useJoinPeerId, getVideoUserName } from '@/hook/room'
 const rtcStore = useRtcStore()
 const socket = rtcStore.rtcSocket as Socket
 const multipVideo = ref()
@@ -35,7 +43,7 @@ const hasInRoom = computed(() => {
 })
 const getVideoList = computed(() => {
   console.log('更新 videoList')
-  return rtcStore.videoList
+  return multipVideo.value?.peerList || []
 })
 
 function setRoomEvent () {
@@ -43,7 +51,6 @@ function setRoomEvent () {
     socket.on('addUser', (id: string) => {
       if (id !== rtcStore.user.userId) {
         multipVideo.value && multipVideo.value.addUser({ userId: id })
-        rtcStore.videoList[id] = rtcStore.user
         Message.info(`${id} 加入房间`)
       }
     })
@@ -56,8 +63,9 @@ function setRoomEvent () {
         const box = document.getElementById(userId)
         box?.remove()
         Message.info(`${userId} 退出房间`)
+        const peerId = useJoinPeerId(userId)
+        multipVideo.value && multipVideo.value.closePeer(peerId)
       }
-      delete rtcStore.videoList[userId]
     })
     multipVideo.value = new MultiplayerRealTime()
     multipVideo.value.init()
@@ -70,9 +78,6 @@ onUnmounted(() => {
 })
 onMounted(() => {
   if (rtcStore.currentRoom.id) {
-    if (rtcStore.user.userId) {
-      rtcStore.videoList[rtcStore.user.userId] = rtcStore.user
-    }
     setRoomEvent()
   }
   console.log(rtcStore.currentRoom, '当前的房间')
@@ -89,13 +94,14 @@ onMounted(() => {
   flex: 1;
   margin: 10px;
   &-video {
-    display: grid;
-    grid-template-columns: repeat(4, calc(25% - 20px));
-    grid-gap: 20px;
-    justify-content: center;
+    display: flex;
+    flex-direction: row;
+    flex-grow: 1;
+    justify-content: space-around;
     flex: 1;
     height: 100%;
     background-color: $bg-white;
+    padding: 10px;
     &-item {
       display: flex;
       flex-direction: column;

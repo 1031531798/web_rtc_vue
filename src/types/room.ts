@@ -12,3 +12,8 @@ export interface RoomType {
 export interface RtcSocketProps {
   socket: Socket
 }
+
+export type RoomVideoType = {
+  name: string
+  userId: string
+}
