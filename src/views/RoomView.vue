@@ -102,6 +102,9 @@ onMounted(() => {
     height: 100%;
     background-color: $bg-white;
     padding: 10px;
+    video {
+      transform: rotateY(180deg);
+    }
     &-item {
       display: flex;
       flex-direction: column;
@@ -119,4 +122,6 @@ onMounted(() => {
     margin-left: 30px;
   }
 }
+// 控制所有video控制条旋转
+video::-webkit-media-controls-enclosure{ transform: rotateY(180deg) !important; }
 </style>
