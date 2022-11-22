@@ -1,3 +1,5 @@
+import { User } from './../types/user'
+import { Socket } from 'socket.io-client/build/esm/socket'
 import { defineStore } from 'pinia'
 export const useRtcStore = defineStore('rtcStore', {
   state: () => {
@@ -5,10 +7,10 @@ export const useRtcStore = defineStore('rtcStore', {
       // 当前room对象
       currentRoom: {
         id: undefined,
-        roomPerson: [],
+        roomPerson: [] as User[],
         messageList: []
       },
-      rtcSocket: {},
+      rtcSocket: undefined as Socket | undefined,
       user: {
         userId: '',
         name: ''

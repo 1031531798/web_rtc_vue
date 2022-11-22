@@ -30,7 +30,7 @@ import { Message } from '@arco-design/web-vue'
 import RoomDetail from '@/components/room/RoomDetail.vue'
 import RoomMessage from '@/components/room/RoomMessage.vue'
 import EmptyRoom from '@/components/room/EmptyRoom.vue'
-import { MultiplayerRealTime } from '@/components/media/multiplayer.js'
+import { MultiplayerRealTime } from '@/components/media/multiplayer'
 import { Socket } from 'socket.io-client'
 import { strParse } from '@/util/util'
 import { leaveRoom } from '@/components/room/roomEvent'
@@ -42,8 +42,7 @@ const hasInRoom = computed(() => {
   return rtcStore.currentRoom.id
 })
 const getVideoList = computed(() => {
-  console.log('更新 videoList')
-  return multipVideo.value?.peerList || []
+  return multipVideo.value?.peerList
 })
 
 function setRoomEvent () {

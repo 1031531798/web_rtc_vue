@@ -12,7 +12,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { useRtcStore } from '@/store'
 import { computed } from 'vue-demi'
 const rtcStore = useRtcStore()

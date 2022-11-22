@@ -17,3 +17,12 @@ export type RoomVideoType = {
   name: string
   userId: string
 }
+
+export interface RtcSdpResponse {
+  userId: string
+  sdp: RTCSessionDescription
+}
+export interface RtcIceResponse {
+  userId: string
+  candidate: RTCIceCandidate
+}
