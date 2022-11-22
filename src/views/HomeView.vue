@@ -5,13 +5,13 @@
       <div>sokcetId: {{user}}</div>
     </header>
     <div class="control-box">
-      <a-button type="primary" status="success" style="margin-right:20px" @click="createRoom">
+      <a-button type="primary" style="margin-bottom: 10px;" status="success" @click="createRoom">
         <template #icon>
           <icon-plus />
         </template>
         <span>创建房间</span>
       </a-button>
-      <a-input-search v-model="text" :style="{width:'320px'}" placeholder="请输入房间号" search-button @search="handleJoin">
+      <a-input-search v-model="text" :style="{width:'320px', marginLeft: '20px'}" placeholder="请输入房间号" search-button @search="handleJoin">
         <template #button-icon>
           <icon-import />
         </template>
@@ -20,7 +20,7 @@
         </template>
       </a-input-search>
     </div>
-    <RoomList style="width: 80%" :data="roomData" />
+    <RoomList style="width: 100%" :data="roomData" />
   </div>
 </template>
 
@@ -33,6 +33,7 @@ import { useRtcStore } from '@/store'
 import { strParse } from '@/util/util'
 import router from '@/router'
 import { joinRoom, leaveRoom } from '@/components/room/roomEvent'
+import { RoomType } from '@/types/room'
 export default defineComponent({
   name: 'HomeView',
   components: {
@@ -43,7 +44,7 @@ export default defineComponent({
     const user = computed(() => {
       return rtcStore.user.userId
     })
-    const roomData = ref([])
+    const roomData = ref<RoomType[]>()
     const rtcStore = useRtcStore()
     const rtcSocket = initSocket()
     // 初始化 socket
@@ -137,8 +138,11 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding-bottom: 20px;
 }
 .control-box {
   margin-top: 20px;
+  text-align: right;
+  padding: 0 5px;
 }
 </style>

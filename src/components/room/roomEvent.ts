@@ -3,7 +3,7 @@ import { Socket } from 'socket.io-client'
 import { useRtcStore } from './../../store/index'
 
 // 加入房间
-export function joinRoom (id: string) {
+export function joinRoom (id: string | number) {
   const { rtcSocket } = useRtcStore()
   if (id && rtcSocket instanceof Socket) {
     rtcSocket.emit('join', id)
