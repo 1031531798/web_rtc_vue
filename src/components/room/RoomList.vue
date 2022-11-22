@@ -56,7 +56,7 @@ export default defineComponent({
       default: () => []
     }
   },
-  setup (props, { emit }) {
+  setup (props) {
     const dataSource = computed(() => {
       return props.data.map((item, index) => {
         return {

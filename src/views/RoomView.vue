@@ -124,4 +124,6 @@ onMounted(() => {
 }
 // 控制所有video控制条旋转
 video::-webkit-media-controls-enclosure{ transform: rotateY(180deg) !important; }
+// video 时间线隐藏
+video::-webkit-media-controls-timeline{display: none !important; }
 </style>

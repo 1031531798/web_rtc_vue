@@ -72,7 +72,6 @@ export class MultiplayerRealTime {
   }
 
   createPeerConnection (user) {
-    const videoBox = document.querySelector('.room-video')
     const iceServer = {
       iceServers: [
         {
@@ -117,6 +116,7 @@ export class MultiplayerRealTime {
     // 发送ICE候选到其他客户端
     peer.onicecandidate = (event) => {
       if (event.candidate) {
+        console.log('发送ice')
         this.socket.emit('__ice_candidate', { candidate: event.candidate, roomid: this.roomData.id, userId: user.userId })
       }
     }
@@ -179,6 +179,7 @@ export class MultiplayerRealTime {
       })
     })
     socket.on('__ice_candidate', v => {
+      console.log('接收到ice')
       // 如果是一个ICE的候选，则将其加入到PeerConnection中
       if (v.candidate) {
         this.peerList[v.userId] && this.peerList[v.userId].addIceCandidate(v.candidate)
