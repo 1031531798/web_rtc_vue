@@ -16,10 +16,9 @@
   display: flex;
   flex-direction: column;
   flex-grow: 1;
-  background: #f2f3f5;
-  flex: 1;
+  background: $bg-home;
   width: 100%;
-  height: 0;
+  height: 100%;
 }
 
 nav {

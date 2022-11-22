@@ -139,6 +139,7 @@ export default defineComponent({
   flex-direction: column;
   align-items: center;
   padding-bottom: 20px;
+  background-color: $bg-home;
 }
 .control-box {
   margin-top: 20px;

@@ -8,7 +8,7 @@
           <IconFaceSmileFill style="color: #ffcd00" />
         </div>
       </div>
-      <div class="room-video-item" :id="item.name" v-for="(item, key) of getVideoList" :key="key">
+      <div class="room-video-item" v-for="(item, key) of getVideoList" :key="key">
         <video controls :id="key"></video>
         <div>{{getVideoUserName(key)}}</div>
       </div>
@@ -42,7 +42,7 @@ const hasInRoom = computed(() => {
   return rtcStore.currentRoom.id
 })
 const getVideoList = computed(() => {
-  return multipVideo.value?.peerList
+  return multipVideo.value?.peerList as {key: string}
 })
 
 function setRoomEvent () {
@@ -97,7 +97,6 @@ onMounted(() => {
     flex-direction: row;
     flex-grow: 1;
     justify-content: space-around;
-    flex: 1;
     height: 100%;
     background-color: $bg-white;
     padding: 10px;
@@ -109,6 +108,10 @@ onMounted(() => {
       flex-direction: column;
       justify-content: flex-start;
       align-items: center;
+      margin: 10px;
+      div {
+        white-space: nowrap;
+      }
     }
   }
   &-main {
@@ -125,4 +128,34 @@ onMounted(() => {
 video::-webkit-media-controls-enclosure{ transform: rotateY(180deg) !important; }
 // video 时间线隐藏
 video::-webkit-media-controls-timeline{display: none !important; }
+</style>
+
+<style lang="scss" scoped>
+@media screen and (max-width: 900px) {
+  .room {
+    flex-direction: column;
+    &-video {
+      width: 100%;
+      height: auto;
+      justify-content: flex-start;
+      overflow-x: auto;
+    }
+    &-main {
+      flex-direction: row;
+      width: 100%;
+      margin-left: 0;
+      .room-detail {
+        display: none;
+      }
+      .room-message {
+        height: 100%;
+        width: 100%;
+      }
+    }
+    video {
+      width: 120px;
+      height: 50px;
+    }
+  }
+}
 </style>

@@ -14,7 +14,7 @@
 
 <script setup lang="ts">
 import { useRtcStore } from '@/store'
-import { computed } from 'vue-demi'
+import { computed } from 'vue'
 const rtcStore = useRtcStore()
 const getRoomPerson = computed(() => {
   return rtcStore.currentRoom.roomPerson || []

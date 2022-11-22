@@ -71,9 +71,11 @@ export class MultiplayerRealTime {
           urls: 'stun:stun.l.google.com:19302'
         }
       ]
-    }) as RTCPeerConnection
+    }) as RTCPeerConnection & {
+      addStream: any
+      onaddstream: any
+    }
     // 向PeerConnection中加入需要发送的流
-    // peer?.addStream(this.localStream)
     // 如果检测到媒体流连接到本地，将其绑定到一个video标签上输出
     if (this.localStream) {
       for (const track of this.localStream.getTracks()) {
@@ -83,18 +85,39 @@ export class MultiplayerRealTime {
     peer.ontrack = (event: RTCTrackEvent) => {
       nextTick(() => {
         const video = document.getElementById(user.userId) as HTMLVideoElement
+        let inboundStream = null
         if (event.streams && event.streams[0]) {
           video.srcObject = event.streams[0]
         } else {
-          if (!this.inboundStream) {
-            this.inboundStream = new MediaStream()
-            video.srcObject = this.inboundStream
+          if (!inboundStream) {
+            inboundStream = new MediaStream()
+            video.srcObject = inboundStream
           }
           video.autoplay = true
-          this.inboundStream.addTrack(event.track)
+          inboundStream.addTrack(event.track)
         }
       })
     }
+    // peer?.addStream(this.localStream)
+    // peer.onaddstream = (event: any) => {
+    //   console.log('检测到媒体流', event, user)
+    //   let video = document.getElementById(user.userId) as HTMLVideoElement
+    //   if (!video) {
+    //     // 没有视频对象 就创建
+    //     video = document.createElement('video')
+    //   }
+    //   if ('srcObject' in video) { // 判断是否支持 srcObject 属性
+    //     video.srcObject = event.stream
+    //   } else {
+    //     video.src = window.URL.createObjectURL(event.stream)
+    //   }
+    //   video.autoplay = true
+    //   video.id = user.userId
+    //   video.onloadedmetadata = () => {
+    //     video.play()
+    //     console.log('播放video', video)
+    //   }
+    // }
     // 发送ICE候选到其他客户端
     peer.onicecandidate = (event) => {
       if (event.candidate) {
