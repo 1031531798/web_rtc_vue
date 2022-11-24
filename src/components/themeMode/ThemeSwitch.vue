@@ -1,6 +1,6 @@
 <template>
   <span class="theme-mode">
-    <a-switch v-model:model-value="systemStore.themeMode" @change="changeSwitch" :checked-value="ThemeModeEnum.drak" :unchecked-value="ThemeModeEnum.light">
+    <a-switch v-model:model-value="systemStore.themeMode" @change="changeSwitch" :checked-value="ThemeModeEnum.dark" :unchecked-value="ThemeModeEnum.light">
       <template #checked>
         <span style="position: relative;right: 2px;">🌜</span>
       </template>
@@ -11,21 +11,28 @@
   </span>
 </template>
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { onMounted } from 'vue'
 import { useSystemStore } from '@/store/system'
 import { ThemeModeEnum } from '@/enums'
 const systemStore = useSystemStore()
-const mode = computed(() => {
-  return systemStore.themeMode
-})
+
 function changeSwitch (val: ThemeModeEnum) {
-  console.log('change mode', val)
   if (val === ThemeModeEnum.light) {
     document.body.removeAttribute('arco-theme')
   } else {
     document.body.setAttribute('arco-theme', 'dark')
   }
 }
+function matchMode (e: {matches: boolean, media: string}) {
+  const colorMode = e.matches ? ThemeModeEnum.dark : ThemeModeEnum.light
+  changeSwitch(colorMode)
+  systemStore.themeMode = colorMode
+}
+onMounted(() => {
+  // 获取系统主题颜色
+  const mql: MediaQueryList = window.matchMedia('(prefers-color-scheme: dark)')
+  matchMode(mql)
+})
 </script>
 <style lang="scss" scoped>
 .theme-mode {
