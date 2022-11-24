@@ -98,7 +98,7 @@ onMounted(() => {
     flex-grow: 1;
     justify-content: space-around;
     height: 100%;
-    background-color: $bg-white;
+    background-color: $bg-home;
     padding: 10px;
     video {
       transform: rotateY(180deg);

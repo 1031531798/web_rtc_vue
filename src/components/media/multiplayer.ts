@@ -71,10 +71,7 @@ export class MultiplayerRealTime {
           urls: 'stun:stun.l.google.com:19302'
         }
       ]
-    }) as RTCPeerConnection & {
-      addStream: any
-      onaddstream: any
-    }
+    })
     // 向PeerConnection中加入需要发送的流
     // 如果检测到媒体流连接到本地，将其绑定到一个video标签上输出
     if (this.localStream) {

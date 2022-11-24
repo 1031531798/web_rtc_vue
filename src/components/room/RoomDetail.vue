@@ -26,6 +26,6 @@ const getRoomPerson = computed(() => {
     width: 100%;
     height: 20%;
     min-height: 300px;
-    background: #fff;
+    background: $bg-home;
   }
 </style>

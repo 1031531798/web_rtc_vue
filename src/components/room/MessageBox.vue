@@ -38,11 +38,18 @@ const hasMyMsg = computed(() => {
   flex-direction: row;
   align-items: center;
   padding: 0 0 0 40px;
+  min-height: 40px;
   position: relative;
-  line-height: 40px;
-  color: #61666D;
+  color: rgb(var(gray-3));
   &-text {
     padding: 0 10px;
+    span {
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-start;
+      text-align: left;
+      line-height: 20px;
+    }
   }
   &-avatar {
     position: absolute;
