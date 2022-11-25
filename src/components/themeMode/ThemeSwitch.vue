@@ -20,7 +20,7 @@ function changeSwitch (val: ThemeModeEnum) {
   if (val === ThemeModeEnum.light) {
     document.body.removeAttribute('arco-theme')
   } else {
-    document.body.setAttribute('arco-theme', 'dark')
+    document.body.setAttribute('arco-theme', ThemeModeEnum.dark)
   }
 }
 function matchMode (e: {matches: boolean, media: string}) {
